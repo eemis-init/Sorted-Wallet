@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -28,4 +30,9 @@ public class User {
     @NotEmpty(message="Password is required")
     private String password;
 
+    @OneToMany(mappedBy = "user")
+    private List<Expense> expenses;
+
+    @OneToMany(mappedBy = "user")
+    private List<ExpenseType> expenseTypes;
 }

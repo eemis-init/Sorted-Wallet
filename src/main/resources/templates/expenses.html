@@ -21,9 +21,16 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <button type="submit" class="btn btn-outline-dark btn-sm btn-shadow">
-            <img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>
-            Sign out</button>
+        <div th:if="${authenticate}">
+            <form th:action="@{/logout}" method="post"></form>
+            <button type="submit" class="btn btn-outline-dark btn-sm btn-shadow">
+                <img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>
+                Sign out</button>
+        </div>
+        <div th:unless="${authenticate}">
+            <a href="/login">Sign in</a>
+        </div>
+
     </div>
 </nav>
 
@@ -200,7 +207,7 @@
                 </div>
 
                 <div class="mb-3"> <!--date-->
-                    <label for="date" class="form-label">Date of birth</label>
+                    <label for="date" class="form-label">Date of purchase</label>
                     <input type="date" class="form-control form-rounded" id="date" th:field="*{date}" th:errorclass="is-invalid">
                     <div id="validationDate" class="invalid-feedback" th:errors="*{date}">
                     </div>

@@ -1,6 +1,7 @@
 package com.cognizant.SortedWallet.service;
 
 import com.cognizant.SortedWallet.model.Expense;
+import com.cognizant.SortedWallet.model.User;
 import com.cognizant.SortedWallet.repository.ExpenseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -17,12 +18,15 @@ import java.util.stream.StreamSupport;
 @Service
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
+    private final UserService userService;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, UserService userService) {
         this.expenseRepository = expenseRepository;
+        this.userService = userService;
     }
 
-    public Expense save(Expense entity) {
+    public Expense save(Expense entity, User user) {
+        entity.setUser(user);
         return expenseRepository.save(entity);
     }
 

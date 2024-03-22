@@ -1,9 +1,6 @@
 package com.cognizant.SortedWallet.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,5 +20,13 @@ public class ExpenseType {
     @Column(unique = true)
     private String expenseCategory;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
+
+    public ExpenseType(Long id, String expenseCategory) {
+        this.id=id;
+        this.expenseCategory=expenseCategory;
+    }
 }

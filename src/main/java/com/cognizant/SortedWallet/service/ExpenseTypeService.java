@@ -3,6 +3,7 @@ package com.cognizant.SortedWallet.service;
 
 import com.cognizant.SortedWallet.exceptions.ExpenseTypeAlreadyExistsException;
 import com.cognizant.SortedWallet.model.ExpenseType;
+import com.cognizant.SortedWallet.model.User;
 import com.cognizant.SortedWallet.repository.ExpenseTypeRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,7 +15,8 @@ import java.util.Collection;
 public class ExpenseTypeService {
     private final ExpenseTypeRepository expenseTypeRepository;
 
-    public ExpenseTypeService(ExpenseTypeRepository expenseTypeRepository) {
+
+    public ExpenseTypeService(ExpenseTypeRepository expenseTypeRepository, UserService userService) {
         this.expenseTypeRepository = expenseTypeRepository;
     }
 
@@ -34,10 +36,11 @@ public class ExpenseTypeService {
      * @return The saved ExpenseType entity.
      * @throws ExpenseTypeAlreadyExistsException If an ExpenseType already exists in the database.
      */
-    public ExpenseType save(ExpenseType entity) throws ExpenseTypeAlreadyExistsException {
+    public ExpenseType save(ExpenseType entity, User user) throws ExpenseTypeAlreadyExistsException {
         if (expenseTypeRepository.existsByExpenseCategoryIgnoreCase(entity.getExpenseCategory())){
             throw new ExpenseTypeAlreadyExistsException("Expense type with name '" + entity.getExpenseCategory() + "' already exists.");
         }
+        entity.setUser(user);
         return expenseTypeRepository.save(entity);
 
     }

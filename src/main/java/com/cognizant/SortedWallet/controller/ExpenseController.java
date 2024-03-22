@@ -3,8 +3,11 @@ package com.cognizant.SortedWallet.controller;
 import com.cognizant.SortedWallet.exceptions.ExpenseTypeAlreadyExistsException;
 import com.cognizant.SortedWallet.model.Expense;
 import com.cognizant.SortedWallet.model.ExpenseType;
+import com.cognizant.SortedWallet.model.User;
+import com.cognizant.SortedWallet.repository.UserRepository;
 import com.cognizant.SortedWallet.service.ExpenseService;
 import com.cognizant.SortedWallet.service.ExpenseTypeService;
+import com.cognizant.SortedWallet.service.UserService;
 import com.cognizant.SortedWallet.utils.Helpers;
 import jakarta.validation.Valid;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,6 +24,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.Month;
 
 @Controller
@@ -29,11 +33,18 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final ExpenseTypeService expenseTypeService;
+
+    private final UserService userService;
+
+    private final UserRepository userRepository;
+
     private static final int PAGE_SIZE = 8; //number of records per page
 
-    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService) {
+    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, UserService userService, UserRepository userRepository) {
         this.expenseService = expenseService;
         this.expenseTypeService = expenseTypeService;
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
 
@@ -99,7 +110,7 @@ public class ExpenseController {
      * @return A view name for redirection based on the processing outcome.
      */
     @PostMapping("/newExpenseType")
-    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Model model){
+    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Principal principal, Model model){
         // Checking for validation errors
         if (errors.hasErrors()) {
             //returns same page to keep data in form fields and show errors
@@ -107,7 +118,9 @@ public class ExpenseController {
         }
         try {
             // Attempt to save the new expense type
-            expenseTypeService.save(expenseType);
+            String email = principal.getName();
+            User user = userRepository.findByEmail(email);
+            expenseTypeService.save(expenseType,user);
         } catch (ExpenseTypeAlreadyExistsException e) {
             // Add error message to the model in case of existing expense type
             model.addAttribute("errorMessage", e.getMessage());
@@ -151,11 +164,13 @@ public class ExpenseController {
      * @return A view name for redirection to the "expenses" page.
      */
     @PostMapping("/AddExpense")
-    public String addExpense(@Valid Expense expense, Errors errors){
+    public String addExpense(@Valid Expense expense, Errors errors, User user){
         if (errors.hasErrors()) {
             return "expenses"; //returns same page to keep data in form fields and to show errors
         }
-        expenseService.save(expense);
+        String email = user.getEmail();
+        userRepository.findByEmail(email);
+        expenseService.save(expense,user);
 
         return "redirect:/expenses";
     }
@@ -188,7 +203,7 @@ public class ExpenseController {
         if (errors.hasErrors()) {
             return "updateExpense";
         }
-        expenseService.save(expense); // Save the updated expense object to the database
+        expenseService.save(expense, new User()); // Save the updated expense object to the database
         return "redirect:/expenses";
     }
 
