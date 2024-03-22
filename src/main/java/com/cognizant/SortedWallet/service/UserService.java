@@ -22,9 +22,10 @@ public class UserService {
 
         userRepository.save(user);
     }
-    public boolean authenticate(String email, String password) {
+    public boolean authenticate(String email, String password, HttpSession session) {
         User user = userRepository.findByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
+            session.setAttribute("user",user);
             return true;
         }
         return false;

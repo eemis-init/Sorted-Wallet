@@ -25,8 +25,7 @@ public class ExpenseService {
         this.userService = userService;
     }
 
-    public Expense save(Expense entity, User user) {
-        entity.setUser(user);
+    public Expense saveIt(Expense entity) {
         return expenseRepository.save(entity);
     }
 

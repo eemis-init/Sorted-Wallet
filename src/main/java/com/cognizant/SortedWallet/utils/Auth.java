@@ -8,11 +8,16 @@ import org.springframework.ui.Model;
 @Service
 public class Auth {
     //	Check for user authentication
-    public User check(HttpSession session, Model model) {
+    public User retrieveAuthenticatedUser(HttpSession session) {
 
         User user = (User) session.getAttribute("user");
 
-        model.addAttribute("user", user);
+        if (user!=null){
+            System.out.println("User authnticated: "+user.getEmail());
+        }
+        else{
+            System.out.println("User not authenticated");
+        }
         return user;
     }
 }

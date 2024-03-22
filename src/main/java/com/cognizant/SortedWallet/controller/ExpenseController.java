@@ -8,7 +8,9 @@ import com.cognizant.SortedWallet.repository.UserRepository;
 import com.cognizant.SortedWallet.service.ExpenseService;
 import com.cognizant.SortedWallet.service.ExpenseTypeService;
 import com.cognizant.SortedWallet.service.UserService;
+import com.cognizant.SortedWallet.utils.Auth;
 import com.cognizant.SortedWallet.utils.Helpers;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -38,13 +40,16 @@ public class ExpenseController {
 
     private final UserRepository userRepository;
 
+    private final Auth auth;
+
     private static final int PAGE_SIZE = 8; //number of records per page
 
-    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, UserService userService, UserRepository userRepository) {
+    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, UserService userService, UserRepository userRepository, Auth auth) {
         this.expenseService = expenseService;
         this.expenseTypeService = expenseTypeService;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.auth = auth;
     }
 
 
@@ -110,17 +115,20 @@ public class ExpenseController {
      * @return A view name for redirection based on the processing outcome.
      */
     @PostMapping("/newExpenseType")
-    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Principal principal, Model model){
+    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Model model, HttpSession session){
+        User user = auth.retrieveAuthenticatedUser(session);
+        if(user==null){
+            return "redirect:/login";
+        }
         // Checking for validation errors
         if (errors.hasErrors()) {
             //returns same page to keep data in form fields and show errors
             return "newExpenseType";
         }
         try {
+            expenseType.setUser(user);
             // Attempt to save the new expense type
-            String email = principal.getName();
-            User user = userRepository.findByEmail(email);
-            expenseTypeService.save(expenseType,user);
+            expenseTypeService.saveIt(expenseType);
         } catch (ExpenseTypeAlreadyExistsException e) {
             // Add error message to the model in case of existing expense type
             model.addAttribute("errorMessage", e.getMessage());
@@ -164,13 +172,16 @@ public class ExpenseController {
      * @return A view name for redirection to the "expenses" page.
      */
     @PostMapping("/AddExpense")
-    public String addExpense(@Valid Expense expense, Errors errors, User user){
+    public String addExpense(@Valid Expense expense, Errors errors, HttpSession session){
+        User user = auth.retrieveAuthenticatedUser(session);
+        if(user==null){
+            return "redirect:/login";
+        }
         if (errors.hasErrors()) {
             return "expenses"; //returns same page to keep data in form fields and to show errors
         }
-        String email = user.getEmail();
-        userRepository.findByEmail(email);
-        expenseService.save(expense,user);
+        expense.setUser(user);
+        expenseService.saveIt(expense);
 
         return "redirect:/expenses";
     }
@@ -203,7 +214,7 @@ public class ExpenseController {
         if (errors.hasErrors()) {
             return "updateExpense";
         }
-        expenseService.save(expense, new User()); // Save the updated expense object to the database
+        expenseService.saveIt(expense); // Save the updated expense object to the database
         return "redirect:/expenses";
     }
 

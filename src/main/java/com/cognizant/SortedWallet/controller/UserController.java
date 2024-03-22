@@ -16,7 +16,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping
+@RequestMapping("")
 public class UserController {
     private final UserService userService;
 
@@ -51,8 +51,8 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public String loginUser(@RequestParam String username, @RequestParam String password, Model model) {
-        if (userService.authenticate(username, password)) {
+    public String loginUser(@RequestParam String username, @RequestParam String password, Model model,HttpSession session) {
+        if (userService.authenticate(username, password,session)) {
             return "redirect:/expenses";
         } else {
             model.addAttribute("errorMessage", "Invalid username or password");

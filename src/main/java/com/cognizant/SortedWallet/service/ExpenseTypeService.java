@@ -36,11 +36,10 @@ public class ExpenseTypeService {
      * @return The saved ExpenseType entity.
      * @throws ExpenseTypeAlreadyExistsException If an ExpenseType already exists in the database.
      */
-    public ExpenseType save(ExpenseType entity, User user) throws ExpenseTypeAlreadyExistsException {
+    public ExpenseType saveIt(ExpenseType entity) throws ExpenseTypeAlreadyExistsException {
         if (expenseTypeRepository.existsByExpenseCategoryIgnoreCase(entity.getExpenseCategory())){
             throw new ExpenseTypeAlreadyExistsException("Expense type with name '" + entity.getExpenseCategory() + "' already exists.");
         }
-        entity.setUser(user);
         return expenseTypeRepository.save(entity);
 
     }
