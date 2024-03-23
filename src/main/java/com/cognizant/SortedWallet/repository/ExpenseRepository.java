@@ -10,6 +10,10 @@ import java.time.LocalDate;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
+    Iterable<Expense> findByUserId(Long userId);
+
+    Page<Expense> findByUser(User user, Pageable pageable);
+
     Page<Expense> findByDateBetweenOrderByCreationDateDesc(LocalDate startDate, LocalDate endDate, Pageable page);
 
 

@@ -43,31 +43,22 @@ public class ExpenseController {
     }
 
 
-    /**
-     * This method retrieves the total amount of all expenses and then adds it into a model
-     * so that it could be accessed and displayed in view
-     *
-     *
-     * @return The total amount of all expenses as a {@link BigDecimal} value.
-     */
     @ModelAttribute("totalAmount")
-    public BigDecimal getTotalAmount(){
-        Iterable<Expense> expenses = expenseService.findAll();
+    public BigDecimal getTotalAmount(HttpSession session){
+        User user = auth.retrieveAuthenticatedUser(session);
+        Iterable<Expense> expenses = expenseService.findByUserId(user.getId());
         return expenseService.getTotalAmount(expenses);
     }
 
-
-    /**
-     * This method fetches a page of expenses from the expense service using the
-     * provided pagination settings. The fetched expenses are then added to the
-     * model, making them available for display in the view.
-     *
-     * @param page The pagination settings, including page number and page size.
-     * @return A Page object containing the fetched expenses.
-     */
     @ModelAttribute("expenses")
-    public Page<Expense> getExpenses(@PageableDefault(size = PAGE_SIZE) Pageable page){
-        return expenseService.findAll(page);
+    public Page<Expense> getExpensesByCurrentUser(@PageableDefault(size = PAGE_SIZE) Pageable page, HttpSession session){
+        User currentUser = auth.retrieveAuthenticatedUser(session);
+        if(currentUser!=null){
+            return expenseService.findByUser(currentUser, page);
+        }
+        else{
+            return Page.empty();
+        }
     }
 
     @GetMapping("/expenses")
@@ -75,9 +66,12 @@ public class ExpenseController {
         return "/expenses";
     }
 
+
+
     @ModelAttribute("expenseTypes")
-    public Iterable<ExpenseType> getExpenseTypes() {
-        return expenseTypeService.findAll();
+    public Iterable<ExpenseType> getExpenseTypes(HttpSession session) {
+        User user = auth.retrieveAuthenticatedUser(session);
+        return expenseTypeService.findByUserId(user.getId());
     }
 
     @ModelAttribute
@@ -96,14 +90,6 @@ public class ExpenseController {
     }
 
 
-    /**
-     * Handles the submission of a new expense type.
-     *
-     * @param expenseType The submitted ExpenseType object.
-     * @param errors      The validation errors from the submitted form.
-     * @param model       The model to add attributes and messages.
-     * @return A view name for redirection based on the processing outcome.
-     */
     @PostMapping("/newExpenseType")
     public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Model model, HttpSession session) throws ExpenseTypeAlreadyExistsException {
         User user = auth.retrieveAuthenticatedUser(session);
@@ -116,26 +102,19 @@ public class ExpenseController {
             return "newExpenseType";
         }
         try {
+            expenseType.setUser(user);
             // Attempt to save the new expense type
-            expenseTypeService.saveIt(expenseType);
+            expenseTypeService.saveIt(expenseType,user);
         } catch (ExpenseTypeAlreadyExistsException e) {
             // Add error message to the model in case of existing expense type
             model.addAttribute("errorMessage", e.getMessage());
             return "newExpenseType";
         }
-        expenseType.setUser(user);
-        expenseTypeService.saveIt(expenseType);
         // Redirect to the "newExpenseType" page after successful processing
         return "redirect:/newExpenseType";
     }
 
 
-    /**
-     * Handles the deletion of an individual expense by its unique identifier.
-     *
-     * @param id The unique identifier of the expense to be deleted.
-     * @return A view name for redirection to the "expenses" page.
-     */
     @PostMapping(value = "expenses/delete/individual/{id}")
     public String deleteExpense(@PathVariable("id") Long id){
         expenseService.deleteById(id);
@@ -158,7 +137,6 @@ public class ExpenseController {
             return "expenses"; //returns same page to keep data in form fields and to show errors
         }
         expense.setUser(user);
-        expenseService.saveIt(expense);
         expenseService.saveIt(expense);
 
         return "redirect:/expenses";
@@ -191,11 +169,12 @@ public class ExpenseController {
     public String showFilteredExpenses(@RequestParam(name = "year", required = false) Integer year,
                                        @RequestParam(name = "month", required = false) Month month,
                                        @RequestParam(name = "expenseTypeFilter", required = false) String expenseType,
-                                       Model model, @PageableDefault(size = PAGE_SIZE) Pageable page) {
+                                       Model model, @PageableDefault(size = PAGE_SIZE) Pageable page, HttpSession session) {
 
         Page<Expense> expenses;
         String monthToDisplay = null;
         String yearToDisplay = null;
+        User user = auth.retrieveAuthenticatedUser(session);
 
         // If all filters are provided (year, month, and expense type)
         if (year != null && month != null && expenseType != null && !expenseType.isEmpty()) {
@@ -233,9 +212,10 @@ public class ExpenseController {
      * @return ResponseEntity containing the CSV data as a downloadable file attachment.
      */
     @GetMapping("/downloadExpenses")
-    public ResponseEntity<Resource> downloadExpenses() {
+    public ResponseEntity<Resource> downloadExpenses(HttpSession session) {
+        User user = auth.retrieveAuthenticatedUser(session);
         // Get all expenses from the database
-        Iterable<Expense> expenses = expenseService.findAll();
+        Iterable<Expense> expenses = expenseService.findByUserId(user.getId());
 
         // Convert expenses to a CSV format
         String csvData = expenseService.convertToCSV(expenses);

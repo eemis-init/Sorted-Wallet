@@ -41,6 +41,10 @@ public class ExpenseService {
                 .orElseThrow(() -> new EntityNotFoundException("Sorry, the content you are looking for does not exist."));
     }
 
+    public Iterable<Expense> findByUserId(Long userId){
+        return expenseRepository.findByUserId(userId);
+    }
+
 
     /**
      * Retrieves a Page of Expense objects sorted by their creation date in descending order.
@@ -58,6 +62,10 @@ public class ExpenseService {
                 Sort.by("creationDate").descending());
 
         return expenseRepository.findAll(sortedPageable);
+    }
+
+    public Page<Expense> findByUser(User user, Pageable pageable){
+        return expenseRepository.findByUser(user,pageable);
     }
 
 

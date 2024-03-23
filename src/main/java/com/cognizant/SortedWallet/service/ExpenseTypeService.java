@@ -8,6 +8,7 @@ import com.cognizant.SortedWallet.repository.ExpenseTypeRepository;
 import com.cognizant.SortedWallet.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -20,6 +21,7 @@ public class ExpenseTypeService {
     private final UserRepository userRepository;
 
 
+    @Autowired
     public ExpenseTypeService(ExpenseTypeRepository expenseTypeRepository, UserService userService, UserRepository userRepository) {
         this.expenseTypeRepository = expenseTypeRepository;
         this.userRepository = userRepository;
@@ -30,9 +32,8 @@ public class ExpenseTypeService {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    public ExpenseType findByUserId(Long id){
-        return expenseTypeRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+    public Iterable<ExpenseType> findByUserId(Long userId){
+        return expenseTypeRepository.findByUserId(userId);
     }
 
     public Optional<User> findByUser(User user){
@@ -52,10 +53,11 @@ public class ExpenseTypeService {
      * @return The saved ExpenseType entity.
      * @throws ExpenseTypeAlreadyExistsException If an ExpenseType already exists in the database.
      */
-    public ExpenseType saveIt(ExpenseType entity) throws ExpenseTypeAlreadyExistsException {
-        if (expenseTypeRepository.existsByExpenseCategoryIgnoreCase(entity.getExpenseCategory())){
-            throw new ExpenseTypeAlreadyExistsException("Expense type with name '" + entity.getExpenseCategory() + "' already exists.");
+    public ExpenseType saveIt(ExpenseType entity, User currentUser) throws ExpenseTypeAlreadyExistsException {
+        if (expenseTypeRepository.existsByUserAndExpenseCategoryIgnoreCase(currentUser,entity.getExpenseCategory())){
+            throw new ExpenseTypeAlreadyExistsException("Expense type with name '" + entity.getExpenseCategory() + "' already exists .");
         }
+        entity.setUser(currentUser);
         return expenseTypeRepository.save(entity);
 
     }
@@ -69,14 +71,14 @@ public class ExpenseTypeService {
      * existing ExpenseType records in the database. If no records are found, it
      * creates and saves a default ExpenseType with the name "Home".
      */
-    @PostConstruct
-    public void init() {
-        Iterable<ExpenseType> allExpenses = expenseTypeRepository.findAll();
-        if (((Collection<?>) allExpenses).isEmpty()) {
-            ExpenseType defaultExpenseType = new ExpenseType(null, "Home");
-            expenseTypeRepository.save(defaultExpenseType);
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//        Iterable<ExpenseType> allExpenses = expenseTypeRepository.findAll();
+//        if (((Collection<?>) allExpenses).isEmpty()) {
+//            ExpenseType defaultExpenseType = new ExpenseType(null, "Home");
+//            expenseTypeRepository.save(defaultExpenseType);
+//        }
+//    }
 
 
     public Iterable<ExpenseType> findAll() {
