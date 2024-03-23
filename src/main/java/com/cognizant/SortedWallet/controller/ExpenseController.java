@@ -4,10 +4,8 @@ import com.cognizant.SortedWallet.exceptions.ExpenseTypeAlreadyExistsException;
 import com.cognizant.SortedWallet.model.Expense;
 import com.cognizant.SortedWallet.model.ExpenseType;
 import com.cognizant.SortedWallet.model.User;
-import com.cognizant.SortedWallet.repository.UserRepository;
 import com.cognizant.SortedWallet.service.ExpenseService;
 import com.cognizant.SortedWallet.service.ExpenseTypeService;
-import com.cognizant.SortedWallet.service.UserService;
 import com.cognizant.SortedWallet.utils.Auth;
 import com.cognizant.SortedWallet.utils.Helpers;
 import jakarta.servlet.http.HttpSession;
@@ -26,7 +24,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.Month;
 
 @Controller
@@ -36,19 +33,12 @@ public class ExpenseController {
     private final ExpenseService expenseService;
     private final ExpenseTypeService expenseTypeService;
 
-    private final UserService userService;
-
-    private final UserRepository userRepository;
-
     private final Auth auth;
-
     private static final int PAGE_SIZE = 8; //number of records per page
 
-    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, UserService userService, UserRepository userRepository, Auth auth) {
+    public ExpenseController(ExpenseService expenseService, ExpenseTypeService expenseTypeService, Auth auth) {
         this.expenseService = expenseService;
         this.expenseTypeService = expenseTypeService;
-        this.userService = userService;
-        this.userRepository = userRepository;
         this.auth = auth;
     }
 
@@ -115,7 +105,7 @@ public class ExpenseController {
      * @return A view name for redirection based on the processing outcome.
      */
     @PostMapping("/newExpenseType")
-    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Model model, HttpSession session){
+    public String addExpenseType(@Valid ExpenseType expenseType, Errors errors, Model model, HttpSession session) throws ExpenseTypeAlreadyExistsException {
         User user = auth.retrieveAuthenticatedUser(session);
         if(user==null){
             return "redirect:/login";
@@ -126,7 +116,6 @@ public class ExpenseController {
             return "newExpenseType";
         }
         try {
-            expenseType.setUser(user);
             // Attempt to save the new expense type
             expenseTypeService.saveIt(expenseType);
         } catch (ExpenseTypeAlreadyExistsException e) {
@@ -134,6 +123,8 @@ public class ExpenseController {
             model.addAttribute("errorMessage", e.getMessage());
             return "newExpenseType";
         }
+        expenseType.setUser(user);
+        expenseTypeService.saveIt(expenseType);
         // Redirect to the "newExpenseType" page after successful processing
         return "redirect:/newExpenseType";
     }
@@ -151,26 +142,12 @@ public class ExpenseController {
         return "redirect:/expenses";
     }
 
-    /**
-     *
-     * Handles the deletion of an individual expense type by its unique identifier.
-     *
-     * @param id The unique identifier of the expense type to be deleted.
-     * @return A view name for redirection to the "newExpenseType" page.
-     */
     @PostMapping(value = "newExpenseType/delete/{id}")
     public String deleteExpenseType(@PathVariable("id") Long id){
         expenseTypeService.deleteById(id);
         return "redirect:/newExpenseType";
     }
 
-    /**
-     * Handles the addition of a new expense record.
-     *
-     * @param expense The expense object to be added.
-     * @param errors  The validation errors, if any, from the submitted expense.
-     * @return A view name for redirection to the "expenses" page.
-     */
     @PostMapping("/AddExpense")
     public String addExpense(@Valid Expense expense, Errors errors, HttpSession session){
         User user = auth.retrieveAuthenticatedUser(session);
@@ -182,21 +159,13 @@ public class ExpenseController {
         }
         expense.setUser(user);
         expenseService.saveIt(expense);
+        expenseService.saveIt(expense);
 
         return "redirect:/expenses";
     }
 
 
-    /**
-     * Displays the update expense form.
-     *
-     * The expense data is then pre-populated in the updateExpense form fields for editing.
-     * The user is presented with the pre-filled form to make updates to the expense details.
-     *
-     * @param id    The ID of the expense to be updated.
-     * @param model The Spring model to add attributes for the view.
-     * @return The name of the view for updating an expense record.
-     */
+
     @GetMapping("/update/{id}")
     public String showUpdateExpenseForm(@PathVariable String id, Model model) {
         Long longId = Long.parseLong(id);
@@ -218,16 +187,6 @@ public class ExpenseController {
         return "redirect:/expenses";
     }
 
-    /**
-     * Handles filtering and displaying expenses based on the provided filter parameters.
-     *
-     * @param year         The year filter for expenses.
-     * @param month        The month filter for expenses.
-     * @param expenseType  The expense type filter for expenses.
-     * @param model        Model object for adding attributes.
-     * @param page         Pageable object specifying the requested page number and page size.
-     * @return The view name to display the filtered expenses along with filter options.
-     */
     @GetMapping("/expenses/filter")
     public String showFilteredExpenses(@RequestParam(name = "year", required = false) Integer year,
                                        @RequestParam(name = "month", required = false) Month month,
@@ -295,4 +254,3 @@ public class ExpenseController {
 
 
 }
-

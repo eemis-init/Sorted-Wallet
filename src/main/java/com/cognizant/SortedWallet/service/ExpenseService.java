@@ -1,9 +1,12 @@
 package com.cognizant.SortedWallet.service;
 
 import com.cognizant.SortedWallet.model.Expense;
+import com.cognizant.SortedWallet.model.ExpenseType;
 import com.cognizant.SortedWallet.model.User;
 import com.cognizant.SortedWallet.repository.ExpenseRepository;
+import com.cognizant.SortedWallet.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,16 +16,15 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
-    private final UserService userService;
 
-    public ExpenseService(ExpenseRepository expenseRepository, UserService userService) {
+    public ExpenseService(ExpenseRepository expenseRepository) {
         this.expenseRepository = expenseRepository;
-        this.userService = userService;
     }
 
     public Expense saveIt(Expense entity) {
