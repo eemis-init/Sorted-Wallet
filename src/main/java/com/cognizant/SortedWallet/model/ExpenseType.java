@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 public class ExpenseType {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "Please specify the type of expense")
-    @Column(unique = true)
+    @Column(unique = false)
     private String expenseCategory;
 
     @ManyToOne

@@ -32,7 +32,6 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final ExpenseTypeService expenseTypeService;
-
     private final Auth auth;
     private static final int PAGE_SIZE = 8; //number of records per page
 
@@ -41,7 +40,6 @@ public class ExpenseController {
         this.expenseTypeService = expenseTypeService;
         this.auth = auth;
     }
-
 
     @ModelAttribute("totalAmount")
     public BigDecimal getTotalAmount(HttpSession session){
@@ -61,22 +59,35 @@ public class ExpenseController {
         }
     }
 
+    @ModelAttribute
+    public Expense getExpense(){
+        return new Expense();
+    }
+
     @GetMapping("/expenses")
     public String showExpenses(){
         return "/expenses";
     }
 
+    @PostMapping("/AddExpense")
+    public String addExpense(@Valid Expense expense, Errors errors, HttpSession session){
+        User user = auth.retrieveAuthenticatedUser(session);
+        if(user==null){
+            return "redirect:/login";
+        }
+        if (errors.hasErrors()) {
+            return "expenses"; //returns same page to keep data in form fields and to show errors
+        }
+        expense.setUser(user);
+        expenseService.saveIt(expense);
 
+        return "redirect:/expenses";
+    }
 
     @ModelAttribute("expenseTypes")
     public Iterable<ExpenseType> getExpenseTypes(HttpSession session) {
         User user = auth.retrieveAuthenticatedUser(session);
         return expenseTypeService.findByUserId(user.getId());
-    }
-
-    @ModelAttribute
-    public Expense getExpense(){
-        return new Expense();
     }
 
     @ModelAttribute
@@ -127,22 +138,6 @@ public class ExpenseController {
         return "redirect:/newExpenseType";
     }
 
-    @PostMapping("/AddExpense")
-    public String addExpense(@Valid Expense expense, Errors errors, HttpSession session){
-        User user = auth.retrieveAuthenticatedUser(session);
-        if(user==null){
-            return "redirect:/login";
-        }
-        if (errors.hasErrors()) {
-            return "expenses"; //returns same page to keep data in form fields and to show errors
-        }
-        expense.setUser(user);
-        expenseService.saveIt(expense);
-
-        return "redirect:/expenses";
-    }
-
-
 
     @GetMapping("/update/{id}")
     public String showUpdateExpenseForm(@PathVariable String id, Model model) {
@@ -157,10 +152,16 @@ public class ExpenseController {
     }
 
     @PostMapping("/update")
-    public String updateExpense(@Valid Expense expense, Errors errors) {
+    public String updateExpense(@Valid Expense expense, Errors errors, HttpSession session) {
         if (errors.hasErrors()) {
             return "updateExpense";
         }
+        User user = auth.retrieveAuthenticatedUser(session);
+        if (user==null){
+            return "redirect:/login";
+        }
+        expense.setUser(user);
+
         expenseService.saveIt(expense); // Save the updated expense object to the database
         return "redirect:/expenses";
     }
@@ -205,12 +206,6 @@ public class ExpenseController {
         return "expenses";
     }
 
-    /**
-     * This method retrieves all expenses from the database, converts them to CSV format,
-     * and returns the CSV data as a downloadable file.
-     *
-     * @return ResponseEntity containing the CSV data as a downloadable file attachment.
-     */
     @GetMapping("/downloadExpenses")
     public ResponseEntity<Resource> downloadExpenses(HttpSession session) {
         User user = auth.retrieveAuthenticatedUser(session);
@@ -230,7 +225,5 @@ public class ExpenseController {
                 .contentLength(resource.contentLength())
                 .body(resource);
     }
-
-
 
 }

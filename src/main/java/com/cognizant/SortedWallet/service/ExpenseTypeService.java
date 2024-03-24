@@ -11,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -41,19 +40,11 @@ public class ExpenseTypeService {
     }
 
 
-
-    /**
-     * Saves an ExpenseType entity.
-     *
-     * This method saves the provided ExpenseType entity to the database after performing
-     * a uniqueness check based on the expense category. If an ExpenseType with the same
-     * expense category (case-insensitive) already exists, an exception is thrown.
-     *
-     * @param entity The ExpenseType entity to be saved.
-     * @return The saved ExpenseType entity.
-     * @throws ExpenseTypeAlreadyExistsException If an ExpenseType already exists in the database.
-     */
     public ExpenseType saveIt(ExpenseType entity, User currentUser) throws ExpenseTypeAlreadyExistsException {
+        Long userId = entity.getUser().getId();
+        String expenseCategory = entity.getExpenseCategory();
+
+        boolean exists = expenseTypeRepository.existsByUserAndExpenseCategoryIgnoreCase(entity.getUser(),expenseCategory);
         if (expenseTypeRepository.existsByUserAndExpenseCategoryIgnoreCase(currentUser,entity.getExpenseCategory())){
             throw new ExpenseTypeAlreadyExistsException("Expense type with name '" + entity.getExpenseCategory() + "' already exists .");
         }
@@ -63,14 +54,6 @@ public class ExpenseTypeService {
     }
 
 
-    /**
-     * Initializes the application's default data.
-     *
-     * This method is automatically executed during application startup due to the
-     * presence of the {@link PostConstruct} annotation. It checks if there are any
-     * existing ExpenseType records in the database. If no records are found, it
-     * creates and saves a default ExpenseType with the name "Home".
-     */
 //    @PostConstruct
 //    public void init() {
 //        Iterable<ExpenseType> allExpenses = expenseTypeRepository.findAll();

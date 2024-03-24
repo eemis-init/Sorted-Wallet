@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("")
 public class UserController {
     private final UserService userService;
-
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -53,6 +52,7 @@ public class UserController {
     @PostMapping("/login")
     public String loginUser(@RequestParam String username, @RequestParam String password, Model model,HttpSession session) {
         if (userService.authenticate(username, password,session)) {
+            session.setAttribute("authenticater",true);
             return "redirect:/expenses";
         } else {
             model.addAttribute("errorMessage", "Invalid username or password");
@@ -60,7 +60,7 @@ public class UserController {
         }
     }
     @GetMapping("/logout")
-    public String logoutUser(HttpServletRequest request) {
+    public String logoutUser(HttpServletRequest request, HttpSession session) {
         request.getSession().invalidate();
         return "redirect:/login";
     }

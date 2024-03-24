@@ -15,24 +15,30 @@
     </style>
 </head>
 <body class="body">
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <a class="navbar-brand" style="color: #232526" th:href="@{/expenses}">Sorted Wallet</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div th:if="${authenticate}">
-            <form th:action="@{/logout}" method="post"></form>
-            <button type="submit" class="btn btn-outline-dark btn-sm btn-shadow">
-                <img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>
-                Sign out</button>
-        </div>
-        <div th:unless="${authenticate}">
-            <a href="/login">Sign in</a>
-        </div>
 
-    </div>
-</nav>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" style="color: #232526" th:href="@{/expenses}">Sorted Wallet</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div th:if="${authenticater}">
+                    <form th:action="@{/logout}" method="post" class="d-flex">
+                        <button type="submit" class="btn btn-outline-dark btn-sm btn-shadow me-2">
+                            <img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>
+                            Sign out
+                        </button>
+                    </form>
+                </div>
+
+                <div th:unless="${authenticater}">
+                    <a href="/login" class="btn btn-outline-dark btn-sm btn-shadow me-2">Sign in</a>
+                </div>
+                </div>
+        </nav>
+
+
 
 
 <div class="container-fluid" id="container">
