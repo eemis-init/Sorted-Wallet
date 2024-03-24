@@ -14,10 +14,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     Page<Expense> findByUser(User user, Pageable pageable);
 
-    Page<Expense> findByDateBetweenOrderByCreationDateDesc(LocalDate startDate, LocalDate endDate, Pageable page);
+    Page<Expense> findByUserAndDateBetweenOrderByCreationDateDesc(User user, LocalDate startDate, LocalDate endDate, Pageable page);
 
-    Page<Expense> findByExpenseTypeOrderByCreationDateDesc(String expenseType, Pageable page);
+    Page<Expense> findByUserAndExpenseTypeOrderByCreationDateDesc(User user, String expenseType, Pageable page);
 
-    Page<Expense> findByDateBetweenAndExpenseTypeOrderByCreationDateDesc(LocalDate startDate, LocalDate endDate, String expenseType, Pageable page);
+    Page<Expense> findByUserAndDateBetweenAndExpenseTypeOrderByCreationDateDesc(User user, LocalDate startDate, LocalDate endDate, String expenseType, Pageable page);
 }
 

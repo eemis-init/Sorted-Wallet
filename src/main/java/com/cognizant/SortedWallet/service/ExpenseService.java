@@ -73,20 +73,20 @@ public class ExpenseService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Page<Expense> getExpensesByYearMonthAndType(int year, Month month, String expenseType, Pageable page) {
+    public Page<Expense> getExpensesByUserYearMonthAndType(User user,int year, Month month, String expenseType, Pageable page) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        return expenseRepository.findByDateBetweenAndExpenseTypeOrderByCreationDateDesc(startDate, endDate, expenseType, page);
+        return expenseRepository.findByUserAndDateBetweenAndExpenseTypeOrderByCreationDateDesc(user, startDate, endDate, expenseType, page);
     }
 
-    public Page<Expense> getExpensesByYearMonth(int year, Month month, Pageable page) {
+    public Page<Expense> getExpensesByUserYearMonth(User user, int year, Month month, Pageable page) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        return expenseRepository.findByDateBetweenOrderByCreationDateDesc(startDate, endDate, page);
+        return expenseRepository.findByUserAndDateBetweenOrderByCreationDateDesc(user, startDate, endDate, page);
     }
 
-    public Page<Expense> getExpensesByType(String expenseType, Pageable page) {
-        return expenseRepository.findByExpenseTypeOrderByCreationDateDesc(expenseType, page);
+    public Page<Expense> getExpensesByUserType(User user, String expenseType, Pageable page) {
+        return expenseRepository.findByUserAndExpenseTypeOrderByCreationDateDesc(user, expenseType, page);
     }
 
 

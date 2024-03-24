@@ -23,16 +23,12 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div th:if="${authenticater}">
-                    <form th:action="@{/logout}" method="post" class="d-flex">
-                        <button type="submit" class="btn btn-outline-dark btn-sm btn-shadow me-2">
-                            <img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>
-                            Sign out
-                        </button>
-                    </form>
+
+                <div th:if="${session.authenticater}">
+                    <a href="/logout" class="btn btn-outline-dark btn-sm btn-shadow me-2"><img width="25" height="25" src="https://img.icons8.com/?size=48&id=82792&format=png" alt="plus-2-math"/>Sign out</a>
                 </div>
 
-                <div th:unless="${authenticater}">
+                <div th:unless="${session.authenticater}">
                     <a href="/login" class="btn btn-outline-dark btn-sm btn-shadow me-2">Sign in</a>
                 </div>
                 </div>
@@ -178,7 +174,8 @@
         <div><br></div>
         <!-- Sidebar content -->
         <div class="container-sm">
-            <h3 class="tableHead">Add expense below:</h3>
+            <h4 th:text="${uname}"></h4>
+            <h4 class="tableHead">Add expense below:</h4>
 
             <form  th:action="@{/AddExpense}" th:method="post" th:object="${expense}" novalidate >
 

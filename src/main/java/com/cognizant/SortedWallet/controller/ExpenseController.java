@@ -49,8 +49,10 @@ public class ExpenseController {
     }
 
     @ModelAttribute("expenses")
-    public Page<Expense> getExpensesByCurrentUser(@PageableDefault(size = PAGE_SIZE) Pageable page, HttpSession session){
+    public Page<Expense> getExpensesByCurrentUser(@PageableDefault(size = PAGE_SIZE) Pageable page,Model model, HttpSession session){
         User currentUser = auth.retrieveAuthenticatedUser(session);
+        String usersname=currentUser.getName();
+        model.addAttribute("uname",usersname);
         if(currentUser!=null){
             return expenseService.findByUser(currentUser, page);
         }
@@ -179,23 +181,23 @@ public class ExpenseController {
 
         // If all filters are provided (year, month, and expense type)
         if (year != null && month != null && expenseType != null && !expenseType.isEmpty()) {
-            expenses = expenseService.getExpensesByYearMonthAndType(year, month, expenseType, page);
+            expenses = expenseService.getExpensesByUserYearMonthAndType(user, year, month, expenseType, page);
             monthToDisplay = Helpers.toSentenceCase(month.toString());
             yearToDisplay = year.toString();
         }
         // If only year and month filters are provided
         else if (year != null && month != null) {
-            expenses = expenseService.getExpensesByYearMonth(year, month, page);
+            expenses = expenseService.getExpensesByUserYearMonth(user, year, month, page);
             monthToDisplay = Helpers.toSentenceCase(month.toString());
             yearToDisplay = year.toString();
         }
         // If only expense type filter is provided
         else if (expenseType != null && !expenseType.isEmpty()) {
-            expenses = expenseService.getExpensesByType(expenseType, page);
+            expenses = expenseService.getExpensesByUserType(user, expenseType, page);
         }
         // If no filters are provided, show all expenses
         else {
-            expenses = expenseService.findAll(page);
+            expenses = expenseService.findByUser(user,page);
         }
 
         model.addAttribute("expenses", expenses);

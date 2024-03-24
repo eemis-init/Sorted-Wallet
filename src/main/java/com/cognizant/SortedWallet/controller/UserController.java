@@ -52,7 +52,9 @@ public class UserController {
     @PostMapping("/login")
     public String loginUser(@RequestParam String username, @RequestParam String password, Model model,HttpSession session) {
         if (userService.authenticate(username, password,session)) {
+//            model.addAttribute("authenticater",true);
             session.setAttribute("authenticater",true);
+            System.out.println(true);
             return "redirect:/expenses";
         } else {
             model.addAttribute("errorMessage", "Invalid username or password");
@@ -60,7 +62,8 @@ public class UserController {
         }
     }
     @GetMapping("/logout")
-    public String logoutUser(HttpServletRequest request, HttpSession session) {
+    public String logoutUser(HttpServletRequest request, Model model,HttpSession session) {
+        session.removeAttribute("authenticater");
         request.getSession().invalidate();
         return "redirect:/login";
     }

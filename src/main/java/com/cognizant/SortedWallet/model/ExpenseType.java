@@ -17,7 +17,6 @@ public class ExpenseType {
     private Long id;
 
     @NotEmpty(message = "Please specify the type of expense")
-    @Column(unique = false)
     private String expenseCategory;
 
     @ManyToOne
