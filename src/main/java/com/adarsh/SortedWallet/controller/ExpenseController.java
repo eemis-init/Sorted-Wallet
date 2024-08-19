@@ -208,6 +208,7 @@ public class ExpenseController {
         return "expenses";
     }
 
+
     @GetMapping("/downloadExpenses")
     public ResponseEntity<Resource> downloadExpenses(HttpSession session) {
         User user = auth.retrieveAuthenticatedUser(session);

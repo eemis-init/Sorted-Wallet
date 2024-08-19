@@ -13,6 +13,6 @@ public interface ExpenseTypeRepository extends JpaRepository<ExpenseType, Long> 
     boolean existsByUserAndExpenseCategoryIgnoreCase(User user, String expenseCategory);
 
 //    boolean existsByUserNotAndExpenseCategoryIgnoreCase(@Param("user") User user, @Param("expenseCategory") String expenseCategory);
-    @Query("SELECT COUNT(et) > 0 FROM ExpenseType et WHERE LOWER(et.expenseCategory) = LOWER(:expenseCategory)")
-    boolean existsByExpenseCategoryIgnoreCase(String expenseCategory);
+//    @Query("SELECT COUNT(et) > 0 FROM ExpenseType et WHERE LOWER(et.expenseCategory) = LOWER(:expenseCategory)")
+//    boolean existsByExpenseCategoryIgnoreCase(String expenseCategory);
 }

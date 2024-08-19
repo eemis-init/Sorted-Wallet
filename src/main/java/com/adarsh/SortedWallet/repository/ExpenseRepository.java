@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-
     Iterable<Expense> findByUserId(Long userId);
 
     Page<Expense> findByUser(User user, Pageable pageable);

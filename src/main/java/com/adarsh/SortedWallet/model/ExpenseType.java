@@ -23,7 +23,6 @@ public class ExpenseType {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
     public ExpenseType(Long id, String expenseCategory) {
         this.id=id;
         this.expenseCategory=expenseCategory;

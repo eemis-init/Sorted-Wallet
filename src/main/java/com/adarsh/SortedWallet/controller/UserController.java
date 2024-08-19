@@ -54,7 +54,7 @@ public class UserController {
         if (userService.authenticate(username, password,session)) {
 //            model.addAttribute("authenticater",true);
             session.setAttribute("authenticater",true);
-            System.out.println(true);
+//            System.out.println(true);
             return "redirect:/expenses";
         } else {
             model.addAttribute("errorMessage", "Invalid username or password");

@@ -10,5 +10,4 @@ public class SortedWalletApplication implements WebMvcConfigurer {
 	public static void main(String[] args) {
 		SpringApplication.run(SortedWalletApplication.class, args);
 	}
-
 }
